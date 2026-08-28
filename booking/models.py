@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 class Room(models.Model):
     name = models.CharField(max_length=100)
@@ -37,6 +38,15 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def clean(self):
+        if self.start_datatime >= self.end_datatime:
+            raise ValidationError('Дата початку повинна бути раніше дати завершення')
+
+        overlapping_bookings = Booking.objects.filter(room=self.room, start_datatime__lt=self.end_datatime, end_datatime__gt=self.start_datatime).exclude(pk=self.pk).exclude(status='cancelled')
+
+        if overlapping_bookings.exists():
+            raise ValidationError('Ця комната вже заброньована на вибраний період')
 
     def __str__(self):
         return f'{self.user.username} - {self.room.name}'
