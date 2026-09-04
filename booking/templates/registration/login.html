@@ -1,0 +1,16 @@
+{% extends "booking/base.html" %}
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+<div class="form-card small">
+    <h1>Вхід</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label>Логін {{ form.username }}</label>
+        <label>Пароль {{ form.password }}</label>
+        <button class="button" type="submit">Увійти</button>
+    </form>
+    <p>Немає акаунта? <a href="{% url 'register' %}">Зареєструватися</a></p>
+</div>
+{% endblock %}

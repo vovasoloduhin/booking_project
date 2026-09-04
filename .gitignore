@@ -2,6 +2,9 @@
 __pycache__/
 *.py[codz]
 *$py.class
+venv
+.idea
+db.sqlite3
 
 # C extensions
 *.so

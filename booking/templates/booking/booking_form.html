@@ -1,0 +1,57 @@
+{% extends "booking/base.html" %}
+{% block title %}Бронювання — {{ room.name }}{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <h1>Бронювання</h1>
+    <p><strong>{{ room.name }}</strong> — {{ room.price }} грн/год</p>
+
+    <form method="post" id="booking-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <label>
+            {{ form.start_datetime.label }}
+            {{ form.start_datetime }}
+        </label>
+        {{ form.start_datetime.errors }}
+
+        <label>
+            {{ form.end_datetime.label }}
+            {{ form.end_datetime }}
+        </label>
+        {{ form.end_datetime.errors }}
+
+        <div id="availability-message" class="availability-message"></div>
+
+        <button class="button" type="submit">Створити бронювання</button>
+        <a class="button secondary" href="{% url 'room_detail' room.id %}">Назад</a>
+    </form>
+</div>
+
+<script>
+const roomId = "{{ room.id }}";
+const startInput = document.getElementById("id_start_datetime");
+const endInput = document.getElementById("id_end_datetime");
+const message = document.getElementById("availability-message");
+
+async function checkAvailability() {
+    if (!startInput.value || !endInput.value) return;
+
+    const params = new URLSearchParams({
+        room: roomId,
+        start: new Date(startInput.value).toISOString(),
+        end: new Date(endInput.value).toISOString()
+    });
+
+    const response = await fetch("{% url 'availability_api' %}?" + params);
+    const data = await response.json();
+
+    message.textContent = data.available ? "✓ Період вільний" : "✗ Період зайнятий";
+    message.className = data.available ? "availability-message ok" : "availability-message bad";
+}
+
+startInput.addEventListener("change", checkAvailability);
+endInput.addEventListener("change", checkAvailability);
+</script>
+{% endblock %}

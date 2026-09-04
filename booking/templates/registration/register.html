@@ -1,0 +1,22 @@
+{% extends "booking/base.html" %}
+{% block title %}Реєстрація{% endblock %}
+
+{% block content %}
+<div class="form-card small">
+    <h1>Реєстрація</h1>
+    <p>Після реєстрації потрібно підтвердити email.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <label>
+                {{ field.label }}
+                {{ field }}
+            </label>
+            {{ field.errors }}
+        {% endfor %}
+        <button class="button" type="submit">Зареєструватися</button>
+    </form>
+    <p>Вже маєте акаунт? <a href="{% url 'login' %}">Увійти</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "booking/base.html" %}
+{% block title %}{{ room.name }}{% endblock %}
+
+{% block content %}
+<div class="detail-card">
+    <div class="badge">{{ room.room_type }}</div>
+    <h1>{{ room.name }}</h1>
+    <p>{{ room.description|default:"Опис поки не додано." }}</p>
+
+    <div class="info-grid">
+        <div><strong>Місткість</strong><span>{{ room.capacity }} осіб</span></div>
+        <div><strong>Ціна</strong><span>{{ room.price }} грн/год</span></div>
+        <div><strong>Особливості</strong><span>{{ room.features|default:"Не вказано" }}</span></div>
+    </div>
+
+    {% if room.is_available %}
+        {% if user.is_authenticated %}
+            <a class="button large" href="{% url 'create_booking' room.id %}">Забронювати</a>
+        {% else %}
+            <p>Щоб забронювати кімнату, спочатку увійдіть.</p>
+            <a class="button" href="{% url 'login' %}?next={% url 'create_booking' room.id %}">Увійти</a>
+        {% endif %}
+    {% else %}
+        <div class="error">Кімната тимчасово недоступна.</div>
+    {% endif %}
+</div>
+{% endblock %}

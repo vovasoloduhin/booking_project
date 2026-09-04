@@ -1,0 +1,83 @@
+{% extends "booking/base.html" %}
+{% block title %}Доступність{% endblock %}
+
+{% block content %}
+<h1>Календар доступності</h1>
+
+<div class="filter">
+    <label>
+        Кімната
+        <select id="room-select">
+            <option value="">Усі кімнати</option>
+            {% for room in rooms %}
+                <option value="{{ room.id }}" {% if selected_room == room.id|stringformat:"s" %}selected{% endif %}>
+                    {{ room.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </label>
+</div>
+
+<div class="calendar-controls">
+    <button class="button secondary" id="prev">← Попередній</button>
+    <h2 id="month-title"></h2>
+    <button class="button secondary" id="next">Наступний →</button>
+</div>
+
+<div id="calendar" class="calendar"></div>
+
+<p class="hint">Червоні блоки — зайняті періоди. Скасовані бронювання не блокують кімнату.</p>
+
+<script>
+let current = new Date();
+const calendar = document.getElementById("calendar");
+const title = document.getElementById("month-title");
+const roomSelect = document.getElementById("room-select");
+
+function monthString(date) {
+    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+}
+
+async function loadCalendar() {
+    const month = monthString(current);
+    title.textContent = current.toLocaleDateString("uk-UA", {month: "long", year: "numeric"});
+
+    const params = new URLSearchParams({month});
+    if (roomSelect.value) params.set("room", roomSelect.value);
+
+    const response = await fetch("{% url 'calendar_api' %}?" + params);
+    const data = await response.json();
+
+    calendar.innerHTML = "";
+
+    const year = current.getFullYear();
+    const monthIndex = current.getMonth();
+    const days = new Date(year, monthIndex + 1, 0).getDate();
+
+    for (let day = 1; day <= days; day++) {
+        const cell = document.createElement("div");
+        cell.className = "day";
+        const heading = document.createElement("strong");
+        heading.textContent = day;
+        cell.appendChild(heading);
+
+        data.bookings.forEach(b => {
+            const start = new Date(b.start);
+            const end = new Date(b.end);
+            if (start.getFullYear() === year && start.getMonth() === monthIndex && start.getDate() === day) {
+                const event = document.createElement("div");
+                event.className = "event";
+                event.textContent = `${start.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"})}–${end.toLocaleTimeString("uk-UA",{hour:"2-digit",minute:"2-digit"})} ${b.room}`;
+                cell.appendChild(event);
+            }
+        });
+        calendar.appendChild(cell);
+    }
+}
+
+document.getElementById("prev").onclick = () => { current.setMonth(current.getMonth() - 1); loadCalendar(); };
+document.getElementById("next").onclick = () => { current.setMonth(current.getMonth() + 1); loadCalendar(); };
+roomSelect.onchange = loadCalendar;
+loadCalendar();
+</script>
+{% endblock %}
