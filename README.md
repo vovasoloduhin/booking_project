@@ -55,4 +55,4 @@ Admin: http://127.0.0.1:8000/admin/
 
 ## PostgreSQL
 
-Для продакшну можна замінити DATABASES на PostgreSQL. SQLite залишено для навчальної розробки.
+Для продакшну можна замінити DATABASES на PostgreSQL. SQLite залишено для начальної розробки.
